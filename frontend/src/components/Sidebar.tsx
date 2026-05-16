@@ -2,13 +2,20 @@
 
 import React from 'react';
 
-const NAV_ITEMS = [
-  { label: 'Dashboard', icon: 'grid', active: true },
-  { label: 'Portafolio', icon: 'briefcase', active: false },
-  { label: 'Mercado RWA', icon: 'trending', active: false },
-  { label: 'Compliance', icon: 'shield', active: false },
-  { label: 'Configuración', icon: 'settings', active: false },
+export type TabId = 'dashboard' | 'portafolio' | 'mercado' | 'compliance' | 'configuracion';
+
+const NAV_ITEMS: { label: string; icon: string; id: TabId }[] = [
+  { label: 'Dashboard', icon: 'grid', id: 'dashboard' },
+  { label: 'Portafolio', icon: 'briefcase', id: 'portafolio' },
+  { label: 'Mercado RWA', icon: 'trending', id: 'mercado' },
+  { label: 'Compliance', icon: 'shield', id: 'compliance' },
+  { label: 'Configuración', icon: 'settings', id: 'configuracion' },
 ];
+
+interface SidebarProps {
+  activeTab?: TabId;
+  onTabChange?: (tab: TabId) => void;
+}
 
 function NavIcon({ icon, className = 'w-4 h-4' }: { icon: string; className?: string }) {
   const paths: Record<string, React.ReactNode> = {
@@ -25,7 +32,7 @@ function NavIcon({ icon, className = 'w-4 h-4' }: { icon: string; className?: st
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({ activeTab = 'dashboard', onTabChange }: SidebarProps) {
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-[#111113] border-r border-[#1C1C1F] flex flex-col z-40 max-lg:hidden">
       {/* Logo */}
@@ -44,9 +51,10 @@ export default function Sidebar() {
         <p className="text-[10px] font-semibold text-[#71717A] uppercase tracking-widest px-3 mb-2">Principal</p>
         {NAV_ITEMS.map((item) => (
           <button
-            key={item.label}
+            key={item.id}
+            onClick={() => onTabChange?.(item.id)}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-              item.active
+              activeTab === item.id
                 ? 'bg-[#1E40AF]/15 text-[#3B82F6] border border-[#1E40AF]/20'
                 : 'text-[#A1A1AA] hover:bg-[#1F1F23] hover:text-[#F4F4F5] border border-transparent'
             }`}

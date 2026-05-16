@@ -4,10 +4,22 @@ import React, { useState } from 'react';
 import { BrowserProvider, Contract } from 'ethers';
 import AetheriusEquityArtifact from '../../AetheriusEquity.json';
 import Sidebar from '@/components/Sidebar';
+import type { TabId } from '@/components/Sidebar';
 import WalletConnect from '@/components/WalletConnect';
 import PortfolioMetrics from '@/components/PortfolioMetrics';
 import RWAMarketTable from '@/components/RWAMarketTable';
+import ComplianceView from '@/components/ComplianceView';
+import SettingsView from '@/components/SettingsView';
 import type { RWAAsset } from '@/lib/mockData';
+
+// ─── Tab titles for TopBar ───
+const TAB_TITLES: Record<TabId, string> = {
+  dashboard: 'Dashboard Institucional',
+  portafolio: 'Portafolio — Avalanche Data API',
+  mercado: 'Mercado Secundario RWA',
+  compliance: 'Compliance — Wavy Node Oracle',
+  configuracion: 'Configuración — eERC20 Auditoría',
+};
 
 // ─── Loading Phase Steps for institutional spinner ───
 const LOADING_PHASES = [
@@ -17,6 +29,7 @@ const LOADING_PHASES = [
 ];
 
 export default function DashboardPage() {
+  const [activeTab, setActiveTab] = useState<TabId>('dashboard');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState('');
@@ -97,17 +110,122 @@ export default function DashboardPage() {
     handleInvest(asset.name);
   };
 
+  // ─── Invest Panel (reusable JSX) ───
+  const InvestPanel = () => (
+    <section className="bg-[#111113] rounded-lg border border-[#1C1C1F] overflow-hidden animate-slide-up" style={{ animationDelay: '300ms' }}>
+      <div className="px-5 py-4 border-b border-[#1C1C1F] flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-[#F4F4F5]">Verificación de Compliance e Inversión</h3>
+          <p className="text-[11px] text-[#71717A] mt-0.5">Oráculo Wavy Node · Smart Contract AetheriusEquity · eERC20</p>
+        </div>
+        {selectedAsset && (
+          <span className="text-xs text-[#F59E0B] font-semibold bg-[#F59E0B]/10 px-3 py-1 rounded-md border border-[#F59E0B]/15">
+            {selectedAsset}
+          </span>
+        )}
+      </div>
+      <div className="p-5 space-y-4">
+        {loading && (
+          <div className="space-y-3">
+            {LOADING_PHASES.map((phase, i) => (
+              <div key={phase.label} className="flex items-center gap-3">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  i < loadingPhase ? 'bg-[#22C55E]/15 text-[#22C55E]' :
+                  i === loadingPhase ? 'bg-[#1E40AF]/15 text-[#3B82F6] animate-pulse-ring' :
+                  'bg-[#18181B] text-[#71717A]'
+                }`}>
+                  {i < loadingPhase ? (
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  ) : i === loadingPhase ? (
+                    <div className="w-2 h-2 rounded-full bg-[#3B82F6] animate-ping" />
+                  ) : (
+                    <div className="w-2 h-2 rounded-full bg-[#27272A]" />
+                  )}
+                </div>
+                <span className={`text-xs font-medium transition-colors ${
+                  i < loadingPhase ? 'text-[#22C55E]' : i === loadingPhase ? 'text-[#F4F4F5]' : 'text-[#71717A]'
+                }`}>{phase.label}</span>
+              </div>
+            ))}
+            <div className="progress-institutional mt-2">
+              <div className="progress-fill" style={{ width: `${((loadingPhase + 1) / LOADING_PHASES.length) * 100}%` }} />
+            </div>
+          </div>
+        )}
+        <button
+          onClick={() => handleInvest()}
+          disabled={loading}
+          id="btn-compliance-invest"
+          className={`w-full py-3.5 px-6 rounded-lg font-semibold text-sm transition-all flex justify-center items-center gap-3 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/50 ${
+            loading
+              ? 'bg-[#18181B] border-2 border-[#1E40AF]/30 text-[#3B82F6]'
+              : 'bg-gradient-to-r from-[#1E40AF] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#2563EB] text-white shadow-lg shadow-blue-900/20'
+          } disabled:cursor-not-allowed`}
+        >
+          {loading && (
+            <svg className="animate-spin-slow h-5 w-5 text-[#3B82F6]" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+              <path className="opacity-80" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" d="M12 2a10 10 0 019.95 9" />
+            </svg>
+          )}
+          {loading ? LOADING_PHASES[loadingPhase]?.label || 'Procesando...' : 'Verificar Compliance e Invertir'}
+        </button>
+        {message && !loading && (
+          <div className={`p-4 rounded-lg border flex items-start gap-3 animate-fade-in ${
+            status === 'error' ? 'bg-[#EF4444]/8 border-[#EF4444]/15 text-[#EF4444]' :
+            status === 'success' ? 'bg-[#22C55E]/8 border-[#22C55E]/15 text-[#22C55E]' :
+            'bg-[#3B82F6]/8 border-[#3B82F6]/15 text-[#3B82F6]'
+          }`}>
+            {status === 'success' && (
+              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            )}
+            {status === 'error' && (
+              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            )}
+            <p className="text-sm font-medium leading-relaxed">{message}</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+
+  // ─── Render active view ───
+  const renderView = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return (
+          <>
+            <PortfolioMetrics walletAddress={walletAddress} />
+            <RWAMarketTable onInvestClick={handleRWAInvest} />
+            <InvestPanel />
+          </>
+        );
+      case 'portafolio':
+        return <PortfolioMetrics walletAddress={walletAddress} />;
+      case 'mercado':
+        return (
+          <>
+            <RWAMarketTable onInvestClick={handleRWAInvest} />
+            <InvestPanel />
+          </>
+        );
+      case 'compliance':
+        return <ComplianceView walletAddress={walletAddress} />;
+      case 'configuracion':
+        return <SettingsView walletAddress={walletAddress} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="h-screen flex overflow-hidden bg-[#09090B]">
-      {/* Sidebar */}
-      <Sidebar />
+      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-[260px] min-w-0">
         {/* Top Bar */}
         <header className="h-14 border-b border-[#1C1C1F] bg-[#111113]/80 backdrop-blur-sm flex items-center justify-between px-6 shrink-0 sticky top-0 z-30">
           <div className="flex items-center gap-4">
-            {/* Mobile Logo */}
             <div className="lg:hidden flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#1E40AF] to-[#3B82F6] flex items-center justify-center">
                 <span className="font-bold text-white text-[10px]">AE</span>
@@ -115,7 +233,7 @@ export default function DashboardPage() {
               <span className="text-sm font-semibold text-[#F4F4F5]">Aetherius</span>
             </div>
             <h1 className="text-sm font-medium text-[#A1A1AA] max-lg:hidden">
-              Dashboard Institucional
+              {TAB_TITLES[activeTab]}
             </h1>
             <span className="text-[10px] text-[#71717A] bg-[#18181B] px-2 py-0.5 rounded font-data border border-[#27272A]">v1.0.0-beta</span>
           </div>
@@ -128,104 +246,10 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Scrollable Content */}
+        {/* Scrollable Content — Renders active view */}
         <main className="flex-1 overflow-y-auto p-5 lg:p-6 space-y-6">
-          {/* Portfolio Metrics — Now accepts wallet address for real data */}
-          <PortfolioMetrics walletAddress={walletAddress} />
+          {renderView()}
 
-          {/* RWA Market Table */}
-          <RWAMarketTable onInvestClick={handleRWAInvest} />
-
-          {/* ═══ Institutional Compliance & Invest Panel ═══ */}
-          {/* ⚠️ INTOCABLE — Este bloque contiene handleInvest y toda la lógica ngrok + Ethers.js ⚠️ */}
-          <section className="bg-[#111113] rounded-lg border border-[#1C1C1F] overflow-hidden animate-slide-up" style={{ animationDelay: '300ms' }}>
-            <div className="px-5 py-4 border-b border-[#1C1C1F] flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-semibold text-[#F4F4F5]">Verificación de Compliance e Inversión</h3>
-                <p className="text-[11px] text-[#71717A] mt-0.5">Oráculo Wavy Node · Smart Contract AetheriusEquity · eERC20</p>
-              </div>
-              {selectedAsset && (
-                <span className="text-xs text-[#F59E0B] font-semibold bg-[#F59E0B]/10 px-3 py-1 rounded-md border border-[#F59E0B]/15">
-                  {selectedAsset}
-                </span>
-              )}
-            </div>
-
-            <div className="p-5 space-y-4">
-              {/* Multi-phase loading indicator */}
-              {loading && (
-                <div className="space-y-3">
-                  {LOADING_PHASES.map((phase, i) => (
-                    <div key={phase.label} className="flex items-center gap-3">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
-                        i < loadingPhase ? 'bg-[#22C55E]/15 text-[#22C55E]' :
-                        i === loadingPhase ? 'bg-[#1E40AF]/15 text-[#3B82F6] animate-pulse-ring' :
-                        'bg-[#18181B] text-[#71717A]'
-                      }`}>
-                        {i < loadingPhase ? (
-                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
-                        ) : i === loadingPhase ? (
-                          <div className="w-2 h-2 rounded-full bg-[#3B82F6] animate-ping" />
-                        ) : (
-                          <div className="w-2 h-2 rounded-full bg-[#27272A]" />
-                        )}
-                      </div>
-                      <span className={`text-xs font-medium transition-colors ${
-                        i < loadingPhase ? 'text-[#22C55E]' :
-                        i === loadingPhase ? 'text-[#F4F4F5]' :
-                        'text-[#71717A]'
-                      }`}>
-                        {phase.label}
-                      </span>
-                    </div>
-                  ))}
-                  {/* Progress bar */}
-                  <div className="progress-institutional mt-2">
-                    <div className="progress-fill" style={{ width: `${((loadingPhase + 1) / LOADING_PHASES.length) * 100}%` }} />
-                  </div>
-                </div>
-              )}
-
-              {/* Invest Button */}
-              <button
-                onClick={() => handleInvest()}
-                disabled={loading}
-                id="btn-compliance-invest"
-                className={`w-full py-3.5 px-6 rounded-lg font-semibold text-sm transition-all flex justify-center items-center gap-3 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/50 ${
-                  loading
-                    ? 'bg-[#18181B] border-2 border-[#1E40AF]/30 text-[#3B82F6]'
-                    : 'bg-gradient-to-r from-[#1E40AF] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#2563EB] text-white shadow-lg shadow-blue-900/20'
-                } disabled:cursor-not-allowed`}
-              >
-                {loading && (
-                  <svg className="animate-spin-slow h-5 w-5 text-[#3B82F6]" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                    <path className="opacity-80" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" d="M12 2a10 10 0 019.95 9" />
-                  </svg>
-                )}
-                {loading ? LOADING_PHASES[loadingPhase]?.label || 'Procesando...' : 'Verificar Compliance e Invertir'}
-              </button>
-
-              {/* Status Messages */}
-              {message && !loading && (
-                <div className={`p-4 rounded-lg border flex items-start gap-3 animate-fade-in ${
-                  status === 'error' ? 'bg-[#EF4444]/8 border-[#EF4444]/15 text-[#EF4444]' :
-                  status === 'success' ? 'bg-[#22C55E]/8 border-[#22C55E]/15 text-[#22C55E]' :
-                  'bg-[#3B82F6]/8 border-[#3B82F6]/15 text-[#3B82F6]'
-                }`}>
-                  {status === 'success' && (
-                    <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  )}
-                  {status === 'error' && (
-                    <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  )}
-                  <p className="text-sm font-medium leading-relaxed">{message}</p>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Footer */}
           <footer className="text-center py-4 text-[10px] text-[#71717A] border-t border-[#1C1C1F]">
             Aetherius Capital Network · Avalanche C-Chain (Fuji Testnet) · Protocolo eERC20 · {new Date().getFullYear()}
           </footer>
