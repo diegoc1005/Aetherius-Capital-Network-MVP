@@ -40,6 +40,23 @@ app.get('/users/:foreign_user_id', (req, res) => {
     res.json(mockUser);
 });
 
+// Endpoint POST /api/register-wallet (Wavy Node Mock)
+app.post('/api/register-wallet', (req, res) => {
+    console.log('Petición recibida en /api/register-wallet:', req.body);
+    
+    // Simulamos la latencia de red de 2.5s para que se vea el loading spinner en el frontend
+    setTimeout(() => {
+        const mockResponse = {
+            success: true,
+            riskScore: 12,
+            riskLevel: "Minimal",
+            message: "Wallet registrada y analizada exitosamente. Cumplimiento AML/KYC verificado."
+        };
+        console.log('Enviando respuesta simulada (Riesgo Mínimo).');
+        res.status(200).json(mockResponse);
+    }, 2500);
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor de Wavy Node ejecutándose en http://localhost:${PORT}`);
 });

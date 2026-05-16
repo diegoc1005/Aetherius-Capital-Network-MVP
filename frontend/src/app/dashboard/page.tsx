@@ -54,17 +54,32 @@ export default function DashboardPage() {
       setLoadingPhase(0);
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
       if (!backendUrl) throw new Error('Falta NEXT_PUBLIC_BACKEND_URL en .env.local');
+      if (!window.avalanche && !window.ethereum) {
+        throw new Error('No se encontró una wallet conectada. Por favor, conecta tu wallet primero.');
+      }
+      
+      // @ts-ignore - window.avalanche exists on Core Wallet
+      const provider = new BrowserProvider(window.avalanche || window.ethereum);
+      const signer = await provider.getSigner();
+      const currentWallet = await signer.getAddress();
 
-      const response = await fetch(`${backendUrl}/users/12345`, {
-        headers: { "ngrok-skip-browser-warning": "true", "Content-Type": "application/json" }
+      // Use local Wavy Node API mock
+      const response = await fetch(`${backendUrl}/api/register-wallet`, {
+        method: 'POST',
+        headers: { "ngrok-skip-browser-warning": "true", "Content-Type": "application/json" },
+        body: JSON.stringify({ walletAddress: currentWallet })
       });
       
       if (!response.ok) {
-        throw new Error('Error al verificar Compliance (KYC).');
+        throw new Error('Error al verificar Compliance (Wavy Node API).');
       }
 
-      const kycData = await response.json();
-      console.log('Datos KYC aprobados:', kycData);
+      const riskData = await response.json();
+      console.log('Oráculo Wavy Node:', riskData);
+      
+      if (riskData.riskScore > 39) {
+          throw new Error(`Transacción denegada. Riesgo: ${riskData.riskLevel} (${riskData.riskScore}/100)`);
+      }
       
       // Phase 2: KYC Verified
       setLoadingPhase(1);
@@ -74,14 +89,6 @@ export default function DashboardPage() {
       setLoadingPhase(2);
       setMessage('Firmando en Blockchain Avalanche...');
 
-      if (!window.avalanche && !window.ethereum) {
-        throw new Error('No se encontró una wallet conectada. Por favor, conecta tu wallet primero.');
-      }
-
-      // @ts-ignore - window.avalanche exists on Core Wallet
-      const provider = new BrowserProvider(window.avalanche || window.ethereum);
-      const signer = await provider.getSigner();
-      
       const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
       if (!contractAddress) throw new Error('Falta NEXT_PUBLIC_CONTRACT_ADDRESS en .env.local');
       
