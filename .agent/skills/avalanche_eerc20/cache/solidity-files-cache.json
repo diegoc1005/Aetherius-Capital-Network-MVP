@@ -1,0 +1,43 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "C:\\Users\\puful\\OneDrive\\Documentos\\Aetherius Capital Network\\.agent\\skills\\avalanche_eerc20\\contracts\\AetheriusEquity.sol": {
+      "lastModificationDate": 1778953078265,
+      "contentHash": "497a427998dc4df3c97b9d90d2b24cb0",
+      "sourceName": "contracts/AetheriusEquity.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "AetheriusEquity",
+        "IEncryptedERC",
+        "IRegistrar"
+      ]
+    }
+  }
+}

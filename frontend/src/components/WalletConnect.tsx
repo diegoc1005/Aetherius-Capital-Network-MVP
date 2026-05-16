@@ -102,56 +102,53 @@ export default function WalletConnect() {
     setAddress(null);
   };
 
-  return (
-    <div className="flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Wallet Connection</h2>
+  const truncateAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
+  return (
+    <div className="flex items-center gap-2">
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md max-w-md text-center">
+        <span className="text-[10px] text-[#EF4444] max-w-[150px] truncate" title={error}>
           {error}
-        </div>
+        </span>
       )}
 
       {address ? (
-        <div className="flex flex-col items-center">
-          <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Connected Address:</p>
-          <code className="mb-4 p-2 bg-gray-100 dark:bg-gray-900 rounded text-sm break-all text-gray-800 dark:text-gray-200">
-            {address}
-          </code>
-          <p className="mb-4 text-sm font-semibold text-green-600 dark:text-green-400">
-            Connected to Avalanche Fuji Testnet
-          </p>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 bg-[#111113] border border-[#27272A] rounded-lg px-3 py-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
+            <code className="text-xs text-[#A1A1AA] font-mono">{truncateAddress(address)}</code>
+          </div>
           <button
             onClick={disconnectWallet}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors"
+            className="p-1.5 rounded-md hover:bg-[#1F1F23] text-[#71717A] hover:text-[#EF4444] transition-colors cursor-pointer"
+            title="Desconectar"
           >
-            Disconnect
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
           </button>
         </div>
       ) : (
         <button
           onClick={connectWallet}
           disabled={isConnecting}
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-md transition-colors flex items-center"
+          className="flex items-center gap-2 bg-[#1E40AF] hover:bg-[#1D4ED8] disabled:bg-[#27272A] disabled:text-[#71717A] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors cursor-pointer"
         >
           {isConnecting ? (
-             <span className="flex items-center">
-               <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-               </svg>
-               Connecting...
-             </span>
+            <>
+              <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Conectando...
+            </>
           ) : (
-            'Connect Wallet'
+            'Conectar Wallet'
           )}
         </button>
       )}
-
-      <div className="mt-6 text-xs text-gray-500 dark:text-gray-400 text-center">
-        <p>Prioritizes Core Wallet (window.avalanche)</p>
-        <p>Requires Avalanche Fuji Testnet</p>
-      </div>
     </div>
   );
 }
