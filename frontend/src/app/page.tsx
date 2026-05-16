@@ -1,247 +1,368 @@
 'use client';
 
-import React, { useState } from 'react';
-import { BrowserProvider, Contract } from 'ethers';
-import AetheriusEquityArtifact from '../AetheriusEquity.json';
-import Sidebar from '@/components/Sidebar';
-import WalletConnect from '@/components/WalletConnect';
-import PortfolioMetrics from '@/components/PortfolioMetrics';
-import RWAMarketTable from '@/components/RWAMarketTable';
-import type { RWAAsset } from '@/lib/mockData';
+import React from 'react';
+import Link from 'next/link';
+import { motion, type Variants } from 'framer-motion';
 
-// ─── Loading Phase Steps for institutional spinner ───
-const LOADING_PHASES = [
-  { label: 'Consultando Oráculo Wavy Node...', icon: 'oracle' },
-  { label: 'Verificando KYC Regulatorio...', icon: 'shield' },
-  { label: 'Firmando en Blockchain Avalanche...', icon: 'chain' },
+// ─── Framer Motion Variants ───
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i: number) => ({
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.15, duration: 0.6, ease: 'easeOut' },
+  }),
+};
+
+const scaleIn: Variants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: (i: number) => ({
+    opacity: 1, scale: 1,
+    transition: { delay: 0.3 + i * 0.12, duration: 0.5, ease: 'easeOut' },
+  }),
+};
+
+// ─── Step Data ───
+const STEPS = [
+  {
+    step: '01',
+    title: 'KYC Regulatorio',
+    description: 'Verificación de identidad con validación de RFC y CURP. Cumplimiento total con legislación mexicana y estándares AML internacionales.',
+    icon: (
+      <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <polyline points="9 12 11 14 15 10" />
+      </svg>
+    ),
+  },
+  {
+    step: '02',
+    title: 'Oráculo Wavy Node',
+    description: 'Análisis de riesgo en tiempo real. El oráculo evalúa el perfil del inversionista y emite alertas AML/KYC antes de aprobar la transacción.',
+    icon: (
+      <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+      </svg>
+    ),
+  },
+  {
+    step: '03',
+    title: 'Firma en Blockchain',
+    description: 'Transacción firmada con Ethers.js sobre Avalanche C-Chain. Fracciones de Capital Privado emitidas como tokens eERC20 con privacidad criptográfica.',
+    icon: (
+      <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="1" y="5" width="22" height="14" rx="7" ry="7" /><circle cx="8" cy="12" r="3" /><circle cx="16" cy="12" r="3" />
+      </svg>
+    ),
+  },
 ];
 
-function PhaseIcon({ icon, className = 'w-4 h-4' }: { icon: string; className?: string }) {
-  const paths: Record<string, React.ReactNode> = {
-    oracle: <><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></>,
-    shield: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></>,
-    chain: <><rect x="1" y="5" width="22" height="14" rx="7" ry="7" /><circle cx="8" cy="12" r="3" /><circle cx="16" cy="12" r="3" /></>,
-  };
+// ─── Tech Cards Data ───
+const TECH_CARDS = [
+  {
+    title: 'Avalanche L1s',
+    badge: 'Red',
+    description: 'Avalanche permite crear blockchains independientes (L1s) con su propio set de validadores, reglas de consenso y VMs personalizadas. Esto garantiza escalabilidad horizontal: cada L1 procesa sus transacciones sin competir por recursos con otras redes. La finalidad es sub-segundo, las comisiones son mínimas, y la privacidad es configurable por cadena.',
+    stats: [
+      { label: 'Finalidad', value: '< 1 seg' },
+      { label: 'Escalabilidad', value: 'Horizontal' },
+      { label: 'Validadores', value: 'Dedicados' },
+    ],
+  },
+  {
+    title: 'Protocolo eERC20',
+    badge: 'Privacidad',
+    description: 'eERC (Encrypted ERC) es el estándar de tokens cifrados de Avalanche. Los balances están completamente encriptados on-chain — solo el titular (y auditores autorizados) pueden ver el saldo real. Las transferencias ocultan los montos usando pruebas de conocimiento cero (ZK), mientras un Módulo de Auditoría permite cumplimiento regulatorio sin sacrificar la privacidad del inversionista.',
+    stats: [
+      { label: 'Balances', value: 'Cifrados' },
+      { label: 'Transferencias', value: 'ZK Proofs' },
+      { label: 'Auditoría', value: 'Configurable' },
+    ],
+  },
+];
+
+export default function LandingPage() {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      {paths[icon]}
-    </svg>
-  );
-}
-
-export default function Home() {
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [status, setStatus] = useState('');
-  const [loadingPhase, setLoadingPhase] = useState(0);
-  const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
-
-  // ════════════════════════════════════════════════════════════
-  // handleInvest — PRESERVED 100% ORIGINAL LOGIC
-  // Connections: ngrok backend → Wavy Node Oracle → Ethers.js
-  // Only addition: multi-phase loading UI states
-  // ════════════════════════════════════════════════════════════
-  const handleInvest = async (assetName?: string) => {
-    setLoading(true);
-    setLoadingPhase(0);
-    setMessage('Consultando Oráculo Wavy Node...');
-    setStatus('loading');
-    if (assetName) setSelectedAsset(assetName);
-
-    try {
-      // Phase 1: Fetch to our backend API for KYC data (Wavy Node Oracle)
-      setLoadingPhase(0);
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-      if (!backendUrl) throw new Error('Falta NEXT_PUBLIC_BACKEND_URL en .env.local');
-
-      const response = await fetch(`${backendUrl}/users/12345`, {
-        headers: { "ngrok-skip-browser-warning": "true", "Content-Type": "application/json" }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Error al verificar Compliance (KYC).');
-      }
-
-      const kycData = await response.json();
-      console.log('Datos KYC aprobados:', kycData);
-      
-      // Phase 2: KYC Verified
-      setLoadingPhase(1);
-      setMessage('Compliance Verificado (Riesgo Bajo). Aprobando transacción en Smart Contract...');
-
-      // Phase 3: Blockchain interaction with Ethers.js
-      setLoadingPhase(2);
-      setMessage('Firmando en Blockchain Avalanche...');
-
-      if (!window.avalanche && !window.ethereum) {
-        throw new Error('No se encontró una wallet conectada. Por favor, conecta tu wallet primero.');
-      }
-
-      // @ts-ignore - window.avalanche exists on Core Wallet
-      const provider = new BrowserProvider(window.avalanche || window.ethereum);
-      const signer = await provider.getSigner();
-      
-      const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
-      if (!contractAddress) throw new Error('Falta NEXT_PUBLIC_CONTRACT_ADDRESS en .env.local');
-      
-      // Contract instance using compiled ABI
-      const contract = new Contract(contractAddress, AetheriusEquityArtifact.abi, signer);
-
-      const contractAddressReal = await contract.getAddress();
-      
-      // Simulate blockchain delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      setMessage(`Inversión aprobada · Contrato verificado en ${contractAddressReal.slice(0, 10)}...${contractAddressReal.slice(-6)}`);
-      setStatus('success');
-
-    } catch (err: any) {
-      console.error(err);
-      setMessage(err.message || 'Ocurrió un error en la transacción.');
-      setStatus('error');
-    } finally {
-      setLoading(false);
-      setSelectedAsset(null);
-    }
-  };
-
-  const handleRWAInvest = (asset: RWAAsset) => {
-    handleInvest(asset.name);
-  };
-
-  return (
-    <div className="h-screen flex overflow-hidden bg-[#09090B]">
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col lg:ml-[260px] min-w-0">
-        {/* Top Bar */}
-        <header className="h-14 border-b border-[#1C1C1F] bg-[#111113]/80 backdrop-blur-sm flex items-center justify-between px-6 shrink-0 sticky top-0 z-30">
-          <div className="flex items-center gap-4">
-            {/* Mobile Logo */}
-            <div className="lg:hidden flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#1E40AF] to-[#3B82F6] flex items-center justify-center">
-                <span className="font-bold text-white text-[10px]">AE</span>
-              </div>
-              <span className="text-sm font-semibold text-[#F4F4F5]">Aetherius</span>
+    <div className="landing-scroll bg-[#09090B] text-[#F4F4F5]">
+      {/* ═══ NAV ═══ */}
+      <motion.nav
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="fixed top-0 left-0 right-0 z-50 border-b border-[#1C1C1F]/60 bg-[#09090B]/80 backdrop-blur-xl"
+      >
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E0115F] to-[#FF2D78] flex items-center justify-center shadow-lg shadow-[#E0115F]/20">
+              <span className="font-bold text-white text-xs tracking-tighter">AE</span>
             </div>
-            <h1 className="text-sm font-medium text-[#A1A1AA] max-lg:hidden">
-              Dashboard Institucional
-            </h1>
-            <span className="text-[10px] text-[#71717A] bg-[#18181B] px-2 py-0.5 rounded font-data border border-[#27272A]">v1.0.0-beta</span>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-[#F4F4F5] leading-tight">Aetherius</span>
+              <span className="text-[9px] font-medium text-[#E0115F] tracking-[0.15em] uppercase leading-tight">Capital Network</span>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-2 text-[11px] text-[#71717A]">
+          <div className="flex items-center gap-6">
+            <span className="hidden sm:flex items-center gap-2 text-[11px] text-[#71717A]">
               <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
-              Fuji Testnet
-            </div>
-            <WalletConnect />
+              Avalanche Fuji
+            </span>
+            <Link
+              href="/dashboard"
+              className="px-5 py-2 bg-[#E0115F] hover:bg-[#FF2D78] text-white text-xs font-semibold rounded-lg transition-all hover:shadow-lg hover:shadow-[#E0115F]/25 cursor-pointer"
+            >
+              Acceder al Terminal
+            </Link>
           </div>
-        </header>
+        </div>
+      </motion.nav>
 
-        {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto p-5 lg:p-6 space-y-6">
-          {/* Portfolio Metrics */}
-          <PortfolioMetrics />
+      {/* ═══ HERO ═══ */}
+      <section className="relative min-h-screen flex items-center justify-center px-6 pt-16 overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#E0115F]/8 blur-[120px] animate-glow-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[#1E40AF]/6 blur-[100px] animate-glow-pulse" style={{ animationDelay: '2s' }} />
+          {/* Grid */}
+          <div className="absolute inset-0 opacity-[0.03]" style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }} />
+        </div>
 
-          {/* RWA Market Table */}
-          <RWAMarketTable onInvestClick={handleRWAInvest} />
+        <div className="relative max-w-4xl mx-auto text-center z-10">
+          <motion.div
+            custom={0}
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#E0115F]/10 border border-[#E0115F]/20 rounded-full mb-8"
+          >
+            <span className="w-2 h-2 rounded-full bg-[#E0115F] animate-pulse" />
+            <span className="text-xs font-medium text-[#E0115F]">Protocolo eERC20 · Avalanche C-Chain</span>
+          </motion.div>
 
-          {/* ═══ Institutional Compliance & Invest Panel ═══ */}
-          <section className="bg-[#111113] rounded-lg border border-[#1C1C1F] overflow-hidden animate-slide-up" style={{ animationDelay: '300ms' }}>
-            <div className="px-5 py-4 border-b border-[#1C1C1F] flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-semibold text-[#F4F4F5]">Verificación de Compliance e Inversión</h3>
-                <p className="text-[11px] text-[#71717A] mt-0.5">Oráculo Wavy Node · Smart Contract AetheriusEquity · eERC20</p>
+          <motion.h1
+            custom={1}
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.08] tracking-tight mb-6"
+          >
+            Liquidez Institucional{' '}
+            <br className="hidden sm:block" />
+            para{' '}
+            <span className="bg-gradient-to-r from-[#E0115F] via-[#FF2D78] to-[#E0115F] bg-clip-text text-transparent animate-gradient-shift">
+              Capital Privado
+            </span>{' '}
+            <br className="hidden sm:block" />
+            en LatAm
+          </motion.h1>
+
+          <motion.p
+            custom={2}
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            className="text-base sm:text-lg text-[#A1A1AA] max-w-2xl mx-auto mb-10 leading-relaxed"
+          >
+            Tokenización de activos reales con privacidad criptográfica, compliance regulatorio automatizado
+            y finalidad sub-segundo sobre la red de Avalanche.
+          </motion.p>
+
+          <motion.div
+            custom={3}
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
+            <Link
+              href="/dashboard"
+              id="btn-hero-cta"
+              className="group relative px-8 py-4 bg-gradient-to-r from-[#E0115F] to-[#B80D4E] text-white font-semibold text-sm rounded-xl transition-all hover:shadow-2xl hover:shadow-[#E0115F]/30 hover:scale-[1.02] cursor-pointer"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                Acceder al Terminal
+                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                </svg>
+              </span>
+            </Link>
+            <a
+              href="https://github.com/diegoc1005/Aetherius-Capital-Network-MVP"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3.5 border border-[#27272A] text-[#A1A1AA] hover:text-[#F4F4F5] hover:border-[#E0115F]/30 font-medium text-sm rounded-xl transition-all cursor-pointer"
+            >
+              Ver Repositorio
+            </a>
+          </motion.div>
+
+          {/* Metrics Bar */}
+          <motion.div
+            custom={4}
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            className="mt-16 grid grid-cols-3 gap-6 max-w-lg mx-auto"
+          >
+            {[
+              { value: '< 1s', label: 'Finalidad' },
+              { value: 'eERC20', label: 'Privacidad' },
+              { value: 'KYC+AML', label: 'Compliance' },
+            ].map((m) => (
+              <div key={m.label} className="text-center">
+                <div className="text-xl sm:text-2xl font-bold text-[#F4F4F5] font-data">{m.value}</div>
+                <div className="text-[10px] text-[#71717A] uppercase tracking-wider mt-1">{m.label}</div>
               </div>
-              {selectedAsset && (
-                <span className="text-xs text-[#F59E0B] font-semibold bg-[#F59E0B]/10 px-3 py-1 rounded-md border border-[#F59E0B]/15">
-                  {selectedAsset}
-                </span>
-              )}
-            </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
 
-            <div className="p-5 space-y-4">
-              {/* Multi-phase loading indicator */}
-              {loading && (
-                <div className="space-y-3">
-                  {LOADING_PHASES.map((phase, i) => (
-                    <div key={phase.label} className="flex items-center gap-3">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
-                        i < loadingPhase ? 'bg-[#22C55E]/15 text-[#22C55E]' :
-                        i === loadingPhase ? 'bg-[#1E40AF]/15 text-[#3B82F6] animate-pulse-ring' :
-                        'bg-[#18181B] text-[#71717A]'
-                      }`}>
-                        {i < loadingPhase ? (
-                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
-                        ) : i === loadingPhase ? (
-                          <div className="w-2 h-2 rounded-full bg-[#3B82F6] animate-ping" />
-                        ) : (
-                          <div className="w-2 h-2 rounded-full bg-[#27272A]" />
-                        )}
-                      </div>
-                      <span className={`text-xs font-medium transition-colors ${
-                        i < loadingPhase ? 'text-[#22C55E]' :
-                        i === loadingPhase ? 'text-[#F4F4F5]' :
-                        'text-[#71717A]'
-                      }`}>
-                        {phase.label}
-                      </span>
+      {/* ═══ HOW IT WORKS ═══ */}
+      <section className="relative py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <span className="text-xs font-semibold text-[#E0115F] uppercase tracking-[0.2em]">Proceso</span>
+            <h2 className="text-3xl sm:text-4xl font-bold mt-3">Cómo Funciona</h2>
+            <p className="text-sm text-[#71717A] mt-3 max-w-md mx-auto">
+              Tres pasos verificables para inversión institucional con compliance automatizado.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {STEPS.map((step, i) => (
+              <motion.div
+                key={step.step}
+                custom={i}
+                variants={scaleIn}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-60px' }}
+                className="glass-card p-6 relative group hover:border-[#E0115F]/20 transition-all duration-300"
+              >
+                {/* Step number */}
+                <div className="text-[80px] font-bold text-[#E0115F]/5 absolute top-3 right-5 leading-none select-none">
+                  {step.step}
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-[#E0115F]/10 border border-[#E0115F]/15 flex items-center justify-center text-[#E0115F] mb-5 group-hover:bg-[#E0115F]/15 transition-colors">
+                  {step.icon}
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
+                <p className="text-sm text-[#A1A1AA] leading-relaxed">{step.description}</p>
+
+                {/* Connector line (not on last) */}
+                {i < STEPS.length - 1 && (
+                  <div className="hidden md:block absolute top-1/2 -right-3 w-6 border-t border-dashed border-[#27272A]" />
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ TECHNOLOGY ═══ */}
+      <section className="relative py-24 px-6 border-t border-[#1C1C1F]">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <span className="text-xs font-semibold text-[#E0115F] uppercase tracking-[0.2em]">Infraestructura</span>
+            <h2 className="text-3xl sm:text-4xl font-bold mt-3">Por Qué Avalanche</h2>
+            <p className="text-sm text-[#71717A] mt-3 max-w-lg mx-auto">
+              Datos extraídos de la documentación oficial mediante el servidor MCP de Avalanche.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {TECH_CARDS.map((card, i) => (
+              <motion.div
+                key={card.title}
+                custom={i}
+                variants={scaleIn}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-60px' }}
+                className="glass-card p-7 hover:border-[#E0115F]/15 transition-all duration-300"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <h3 className="text-xl font-bold">{card.title}</h3>
+                  <span className="px-2.5 py-0.5 text-[10px] font-bold text-[#E0115F] bg-[#E0115F]/10 rounded-md border border-[#E0115F]/15 uppercase tracking-wider">
+                    {card.badge}
+                  </span>
+                </div>
+                <p className="text-sm text-[#A1A1AA] leading-relaxed mb-6">
+                  {card.description}
+                </p>
+                <div className="grid grid-cols-3 gap-3">
+                  {card.stats.map((s) => (
+                    <div key={s.label} className="bg-[#09090B]/60 rounded-lg p-3 text-center border border-[#27272A]/40">
+                      <div className="text-sm font-bold text-[#F4F4F5] font-data">{s.value}</div>
+                      <div className="text-[10px] text-[#71717A] mt-0.5">{s.label}</div>
                     </div>
                   ))}
-                  {/* Progress bar */}
-                  <div className="progress-institutional mt-2">
-                    <div className="progress-fill" style={{ width: `${((loadingPhase + 1) / LOADING_PHASES.length) * 100}%` }} />
-                  </div>
                 </div>
-              )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-              {/* Invest Button */}
-              <button
-                onClick={() => handleInvest()}
-                disabled={loading}
-                id="btn-compliance-invest"
-                className={`w-full py-3.5 px-6 rounded-lg font-semibold text-sm transition-all flex justify-center items-center gap-3 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/50 ${
-                  loading
-                    ? 'bg-[#18181B] border-2 border-[#1E40AF]/30 text-[#3B82F6]'
-                    : 'bg-gradient-to-r from-[#1E40AF] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#2563EB] text-white shadow-lg shadow-blue-900/20'
-                } disabled:cursor-not-allowed`}
-              >
-                {loading && (
-                  <svg className="animate-spin-slow h-5 w-5 text-[#3B82F6]" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                    <path className="opacity-80" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" d="M12 2a10 10 0 019.95 9" />
-                  </svg>
-                )}
-                {loading ? LOADING_PHASES[loadingPhase]?.label || 'Procesando...' : 'Verificar Compliance e Invertir'}
-              </button>
+      {/* ═══ CTA ═══ */}
+      <section className="relative py-24 px-6 border-t border-[#1C1C1F]">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="max-w-2xl mx-auto text-center"
+        >
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            Empieza a Invertir <span className="text-[#E0115F]">Ahora</span>
+          </h2>
+          <p className="text-sm text-[#A1A1AA] mb-8 max-w-md mx-auto">
+            Conecta tu Core Wallet o MetaMask y accede al terminal institucional de Capital Privado sobre Avalanche Fuji Testnet.
+          </p>
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#E0115F] to-[#B80D4E] text-white font-semibold text-sm rounded-xl transition-all hover:shadow-2xl hover:shadow-[#E0115F]/30 hover:scale-[1.02] cursor-pointer"
+          >
+            Acceder al Terminal
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+            </svg>
+          </Link>
+        </motion.div>
+      </section>
 
-              {/* Status Messages */}
-              {message && !loading && (
-                <div className={`p-4 rounded-lg border flex items-start gap-3 animate-fade-in ${
-                  status === 'error' ? 'bg-[#EF4444]/8 border-[#EF4444]/15 text-[#EF4444]' :
-                  status === 'success' ? 'bg-[#22C55E]/8 border-[#22C55E]/15 text-[#22C55E]' :
-                  'bg-[#3B82F6]/8 border-[#3B82F6]/15 text-[#3B82F6]'
-                }`}>
-                  {status === 'success' && (
-                    <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  )}
-                  {status === 'error' && (
-                    <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  )}
-                  <p className="text-sm font-medium leading-relaxed">{message}</p>
-                </div>
-              )}
+      {/* ═══ FOOTER ═══ */}
+      <footer className="border-t border-[#1C1C1F] py-8 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#E0115F] to-[#FF2D78] flex items-center justify-center">
+              <span className="font-bold text-white text-[8px]">AE</span>
             </div>
-          </section>
-
-          {/* Footer */}
-          <footer className="text-center py-4 text-[10px] text-[#71717A] border-t border-[#1C1C1F]">
-            Aetherius Capital Network · Avalanche C-Chain (Fuji Testnet) · Protocolo eERC20 · {new Date().getFullYear()}
-          </footer>
-        </main>
-      </div>
+            <span className="text-xs text-[#71717A]">Aetherius Capital Network © {new Date().getFullYear()}</span>
+          </div>
+          <div className="flex items-center gap-4 text-[10px] text-[#71717A]">
+            <span>Avalanche Fuji Testnet</span>
+            <span>·</span>
+            <span>Protocolo eERC20</span>
+            <span>·</span>
+            <span>Wavy Node Oracle</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

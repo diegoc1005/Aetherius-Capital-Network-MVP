@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { BrowserProvider, Eip1193Provider } from 'ethers';
 
 const FUJI_CHAIN_ID = '0xa869'; // 43113 in hex
@@ -12,10 +12,19 @@ declare global {
   }
 }
 
-export default function WalletConnect() {
+interface WalletConnectProps {
+  onAddressChange?: (address: string | null) => void;
+}
+
+export default function WalletConnect({ onAddressChange }: WalletConnectProps = {}) {
   const [address, setAddress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+
+  // Notify parent of address changes
+  useEffect(() => {
+    onAddressChange?.(address);
+  }, [address, onAddressChange]);
 
   const getProvider = useCallback(() => {
     if (typeof window === 'undefined') return null;

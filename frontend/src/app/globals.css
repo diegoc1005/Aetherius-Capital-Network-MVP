@@ -14,10 +14,18 @@
   --border:        #27272A;
   --border-subtle: #1C1C1F;
 
-  /* ─── Brand ─── */
-  --primary:       #1E40AF;
-  --primary-light: #3B82F6;
-  --primary-glow:  rgba(59, 130, 246, 0.15);
+  /* ─── Brand (Landing — Rojo Rubí Brillante Bitso-inspired) ─── */
+  --primary:       #E0115F;
+  --primary-light: #FF2D78;
+  --primary-deep:  #B80D4E;
+  --primary-glow:  rgba(224, 17, 95, 0.20);
+
+  /* ─── Brand (Dashboard Terminal — Azul Institucional) ─── */
+  --primary-blue:       #1E40AF;
+  --primary-blue-light: #3B82F6;
+  --primary-blue-glow:  rgba(59, 130, 246, 0.15);
+
+  /* ─── Accent ─── */
   --accent:        #F59E0B;
   --accent-glow:   rgba(245, 158, 11, 0.12);
 
@@ -81,7 +89,6 @@ body {
   font-family: var(--font-display);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
 }
 
 ::selection {
@@ -231,3 +238,67 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════
+   LANDING PAGE — Bitso-inspired animations
+   ═══════════════════════════════════════════════════════ */
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%      { opacity: 0.7; transform: scale(1.05); }
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-8px); }
+}
+
+@keyframes line-draw {
+  from { stroke-dashoffset: 100; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+/* ─── Glass Card (Landing) ─── */
+.glass-card {
+  background: rgba(17, 17, 19, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(39, 39, 42, 0.5);
+  border-radius: 1rem;
+}
+
+/* ─── Landing Scrollable ─── */
+.landing-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100vh;
+}
+
+.landing-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.landing-scroll::-webkit-scrollbar-thumb {
+  background: rgba(224, 17, 95, 0.3);
+  border-radius: 2px;
+}
+
