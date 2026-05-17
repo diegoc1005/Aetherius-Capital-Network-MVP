@@ -22,6 +22,7 @@ export default function DashboardHeader({ onAddressChange }: DashboardHeaderProp
             fill={true}
             className="object-contain object-left"
             priority={true} 
+            unoptimized={true}
           />
         </div>
       </div>

@@ -100,6 +100,7 @@ export default function LandingPage() {
                 fill={true}
                 className="object-contain object-left"
                 priority={true} 
+                unoptimized={true}
               />
             </div>
           </div>
@@ -130,6 +131,7 @@ export default function LandingPage() {
               fill={true}
               className="object-contain"
               priority={true}
+              unoptimized={true}
             />
           </div>
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#E0115F]/8 blur-[120px] animate-glow-pulse" />
