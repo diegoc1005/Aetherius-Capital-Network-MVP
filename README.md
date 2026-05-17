@@ -91,11 +91,15 @@ Aetherius-Capital-Network/
 │   │   │   └── WalletConnect.tsx   # Conexión Core/MetaMask
 │   │   ├── lib/
 │   │   │   └── mockData.ts   # Datos mock + funciones Data API
-│   │   └── AetheriusEquity.json   # ABI del contrato
-│   ├── .env.local             # Variables de entorno
+│   │   └── AetheriusEquity.json   # ABI del contrato sincronizado
+│   ├── .env.local             # Variables de entorno frontend
+│   └── package.json
+├── smart_contracts/           # Entorno Hardhat de Smart Contracts
+│   ├── contracts/             # Lógica eERC20 (AetheriusEquity.sol)
+│   ├── scripts/               # Scripts de despliegue
+│   ├── hardhat.config.ts      # Configuración de red Avalanche Fuji
 │   └── package.json
 ├── .agent/skills/
-│   ├── avalanche_eerc20/      # Smart contract + deploy scripts
 │   └── ui-ux-pro-max/         # Design system intelligence
 └── README.md
 ```
