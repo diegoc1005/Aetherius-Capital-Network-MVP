@@ -93,18 +93,22 @@ export default function LandingPage() {
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative w-9 h-9 rounded-xl bg-[#0e0f14] flex items-center justify-center ruby-glow overflow-hidden shadow-lg shadow-[#E0115F]/20">
+            <div className="relative w-10 h-10 rounded-xl bg-[#111113] flex items-center justify-center overflow-hidden border border-white/5 shadow-md">
               <Image 
                 src="/aetherius-logo.png" 
                 alt="Aetherius Isotype"
                 fill={true}
-                className="object-contain"
+                className="object-contain p-2"
                 priority={true} 
               />
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold text-[#F4F4F5] leading-tight">Aetherius</span>
-              <span className="text-[9px] font-medium text-[#E0115F] tracking-[0.15em] uppercase leading-tight">Capital Network</span>
+            <div className="flex flex-col justify-center pt-0.5">
+              <span className="font-black text-xl tracking-wide text-white leading-none">
+                ÆTHERIUS<span className="text-[#E0115F]">.</span>
+              </span>
+              <span className="text-[10px] text-[#60728F] font-bold uppercase tracking-[0.15em] leading-none mt-1">
+                CAPITAL NETWORK
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-6">
@@ -127,7 +131,7 @@ export default function LandingPage() {
         {/* Background Effects */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {/* Large Logo Background */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[800px] sm:h-[800px] opacity-[0.05] mix-blend-screen animate-glow-pulse">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[900px] sm:h-[900px] opacity-[0.03] mix-blend-screen blur-2xl animate-glow-pulse">
             <Image 
               src="/aetherius-logo.png" 
               alt="Aetherius Background"
