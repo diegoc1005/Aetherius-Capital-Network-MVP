@@ -13,13 +13,21 @@ declare global {
 }
 
 interface WalletConnectProps {
+  connectedAddress?: string | null;
   onAddressChange?: (address: string | null) => void;
 }
 
-export default function WalletConnect({ onAddressChange }: WalletConnectProps = {}) {
-  const [address, setAddress] = useState<string | null>(null);
+export default function WalletConnect({ connectedAddress, onAddressChange }: WalletConnectProps = {}) {
+  const [address, setAddress] = useState<string | null>(connectedAddress || null);
   const [error, setError] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+
+  // Sync internal address state with connectedAddress prop
+  useEffect(() => {
+    if (connectedAddress !== undefined) {
+      setAddress(connectedAddress);
+    }
+  }, [connectedAddress]);
 
   // Notify parent of address changes
   useEffect(() => {
@@ -40,6 +48,58 @@ export default function WalletConnect({ onAddressChange }: WalletConnectProps = 
     }
 
     return null;
+  }, []);
+
+  // Check if already connected on mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const isDisconnected = typeof window !== 'undefined' && localStorage.getItem('wallet_disconnected') === 'true';
+        if (isDisconnected) return;
+
+        const provider = getProvider();
+        if (provider) {
+          const accounts = await provider.send('eth_accounts', []);
+          if (accounts && accounts.length > 0) {
+            setAddress(accounts[0]);
+          }
+        }
+      } catch (err) {
+        console.error('Error checking connection on mount:', err);
+      }
+    };
+    checkConnection();
+  }, [getProvider]);
+
+  // Listen to provider events (accountsChanged, chainChanged)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const provider = window.avalanche || window.ethereum;
+    if (provider && provider.on) {
+      const handleAccounts = (accounts: string[]) => {
+        if (accounts.length > 0) {
+          localStorage.setItem('wallet_disconnected', 'false');
+          setAddress(accounts[0]);
+        } else {
+          localStorage.setItem('wallet_disconnected', 'true');
+          setAddress(null);
+        }
+      };
+
+      const handleChain = () => {
+        window.location.reload();
+      };
+
+      provider.on('accountsChanged', handleAccounts as any);
+      provider.on('chainChanged', handleChain as any);
+
+      return () => {
+        if (provider.removeListener) {
+          provider.removeListener('accountsChanged', handleAccounts as any);
+          provider.removeListener('chainChanged', handleChain as any);
+        }
+      };
+    }
   }, []);
 
   const switchToFuji = async (provider: BrowserProvider) => {
@@ -95,6 +155,7 @@ export default function WalletConnect({ onAddressChange }: WalletConnectProps = 
          await switchToFuji(provider);
       }
 
+      localStorage.setItem('wallet_disconnected', 'false');
       setAddress(connectedAddress);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -108,6 +169,7 @@ export default function WalletConnect({ onAddressChange }: WalletConnectProps = 
   };
 
   const disconnectWallet = () => {
+    localStorage.setItem('wallet_disconnected', 'true');
     setAddress(null);
   };
 

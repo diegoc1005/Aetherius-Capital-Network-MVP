@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import WalletConnect from './WalletConnect';
 
 interface DashboardHeaderProps {
+  walletAddress?: string | null;
   onAddressChange?: (address: string | null) => void;
 }
 
-export default function DashboardHeader({ onAddressChange }: DashboardHeaderProps) {
+export default function DashboardHeader({ walletAddress, onAddressChange }: DashboardHeaderProps) {
   const router = useRouter();
 
   return (
@@ -29,7 +30,7 @@ export default function DashboardHeader({ onAddressChange }: DashboardHeaderProp
       
       {/* Botones de Cabecera */}
       <div className="flex items-center space-x-4">
-        <WalletConnect onAddressChange={onAddressChange} />
+        <WalletConnect connectedAddress={walletAddress} onAddressChange={onAddressChange} />
       </div>
     </header>
   );

@@ -27,7 +27,8 @@ const STEPS = [
   {
     step: '01',
     title: 'KYC Regulatorio',
-    description: 'Verificación de identidad con validación de RFC y CURP. Cumplimiento total con legislación mexicana y estándares AML internacionales.',
+    description:
+      'Verificación de identidad con validación de RFC y CURP. Cumplimiento total con legislación mexicana y estándares AML internacionales.',
     icon: (
       <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -38,7 +39,8 @@ const STEPS = [
   {
     step: '02',
     title: 'Oráculo Wavy Node',
-    description: 'Análisis de riesgo en tiempo real. El oráculo evalúa el perfil del inversionista y emite alertas AML/KYC antes de aprobar la transacción.',
+    description:
+      'Análisis de riesgo en tiempo real. El oráculo evalúa el perfil del inversionista y emite alertas AML/KYC antes de aprobar la transacción.',
     icon: (
       <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
@@ -48,7 +50,8 @@ const STEPS = [
   {
     step: '03',
     title: 'Firma en Blockchain',
-    description: 'Transacción firmada con Ethers.js sobre Avalanche C-Chain. Fracciones de Capital Privado emitidas como tokens eERC20 con privacidad criptográfica.',
+    description:
+      'Transacción firmada con Ethers.js sobre Avalanche C-Chain. Fracciones de Capital Privado emitidas como tokens eERC20 con privacidad criptográfica.',
     icon: (
       <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="1" y="5" width="22" height="14" rx="7" ry="7" /><circle cx="8" cy="12" r="3" /><circle cx="16" cy="12" r="3" />
@@ -62,7 +65,8 @@ const TECH_CARDS = [
   {
     title: 'Avalanche L1s',
     badge: 'Red',
-    description: 'Avalanche permite crear blockchains independientes (L1s) con su propio set de validadores, reglas de consenso y VMs personalizadas. Esto garantiza escalabilidad horizontal: cada L1 procesa sus transacciones sin competir por recursos con otras redes. La finalidad es sub-segundo, las comisiones son mínimas, y la privacidad es configurable por cadena.',
+    description:
+      'Avalanche permite crear blockchains independientes (L1s) con su propio set de validadores, reglas de consenso y VMs personalizadas. Esto garantiza escalabilidad horizontal: cada L1 procesa sus transacciones sin competir por recursos con otras redes. La finalidad es sub-segundo, las comisiones son mínimas, y la privacidad es configurable por cadena.',
     stats: [
       { label: 'Finalidad', value: '< 1 seg' },
       { label: 'Escalabilidad', value: 'Horizontal' },
@@ -72,7 +76,8 @@ const TECH_CARDS = [
   {
     title: 'Protocolo eERC20',
     badge: 'Privacidad',
-    description: 'eERC (Encrypted ERC) es el estándar de tokens cifrados de Avalanche. Los balances están completamente encriptados on-chain — solo el titular (y auditores autorizados) pueden ver el saldo real. Las transferencias ocultan los montos usando pruebas de conocimiento cero (ZK), mientras un Módulo de Auditoría permite cumplimiento regulatorio sin sacrificar la privacidad del inversionista.',
+    description:
+      'eERC (Encrypted ERC) es el estándar de tokens cifrados de Avalanche. Los balances están completamente encriptados on-chain — solo el titular (y auditores autorizados) pueden ver el saldo real. Las transferencias ocultan los montos usando pruebas de conocimiento cero (ZK), mientras un Módulo de Auditoría permite cumplimiento regulatorio sin sacrificar la privacidad del inversionista.',
     stats: [
       { label: 'Balances', value: 'Cifrados' },
       { label: 'Transferencias', value: 'ZK Proofs' },
@@ -84,6 +89,7 @@ const TECH_CARDS = [
 export default function LandingPage() {
   return (
     <div className="landing-scroll bg-[#09090B] text-[#F4F4F5]">
+
       {/* ═══ NAV ═══ */}
       <motion.nav
         initial={{ opacity: 0, y: -20 }}
@@ -93,14 +99,14 @@ export default function LandingPage() {
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center">
-            <div className="relative w-40 h-10 flex items-center justify-center">
-              <Image 
-                src="/aetherius-logo.png" 
+            <div className="relative w-40 h-10">
+              <Image
+                src="/aetherius-logo.png"
                 alt="Aetherius Logo"
-                fill={true}
+                fill
                 className="object-contain object-left"
-                priority={true} 
-                unoptimized={true}
+                priority
+                unoptimized
               />
             </div>
           </div>
@@ -111,7 +117,7 @@ export default function LandingPage() {
             </span>
             <Link
               href="/dashboard"
-              className="px-5 py-2 bg-[#E0115F] hover:bg-[#FF2D78] text-white text-xs font-semibold rounded-lg transition-all hover:shadow-lg hover:shadow-[#E0115F]/25 cursor-pointer"
+              className="px-5 py-2 bg-[#E0115F] hover:bg-[#FF2D78] text-white text-xs font-semibold rounded-lg transition-all hover:shadow-lg hover:shadow-[#E0115F]/25"
             >
               Acceder al Terminal
             </Link>
@@ -123,24 +129,27 @@ export default function LandingPage() {
       <section className="relative min-h-screen flex items-center justify-center px-6 pt-16 overflow-hidden">
         {/* Background Effects */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Large Logo Background */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[900px] sm:h-[900px] opacity-[0.03] mix-blend-screen blur-2xl animate-glow-pulse">
-            <Image 
-              src="/aetherius-logo.png" 
+            <Image
+              src="/aetherius-logo.png"
               alt="Aetherius Background"
-              fill={true}
+              fill
               className="object-contain"
-              priority={true}
-              unoptimized={true}
+              priority
+              unoptimized
             />
           </div>
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#E0115F]/8 blur-[120px] animate-glow-pulse" />
           <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[#1E40AF]/6 blur-[100px] animate-glow-pulse" style={{ animationDelay: '2s' }} />
           {/* Grid */}
-          <div className="absolute inset-0 opacity-[0.03]" style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }} />
+          <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage:
+                'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+              backgroundSize: '60px 60px',
+            }}
+          />
         </div>
 
         <div className="relative max-w-4xl mx-auto text-center z-10">
@@ -190,18 +199,22 @@ export default function LandingPage() {
             animate="visible"
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
+            {/* ── PRIMARY CTA — navega directo al dashboard ── */}
             <Link
-              href="/dashboard"
               id="btn-hero-cta"
-              className="group relative px-8 py-4 bg-gradient-to-r from-[#E0115F] to-[#B80D4E] text-white font-semibold text-sm rounded-xl transition-all hover:shadow-2xl hover:shadow-[#E0115F]/30 hover:scale-[1.02] cursor-pointer"
+              href="/dashboard"
+              className="group relative inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#E0115F] to-[#B80D4E] text-white font-semibold text-sm rounded-xl transition-all hover:shadow-2xl hover:shadow-[#E0115F]/30 hover:scale-[1.02]"
             >
-              <span className="relative z-10 flex items-center gap-2">
-                Acceder al Terminal
-                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                </svg>
-              </span>
+              Acceder al Terminal
+              <svg
+                className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+              </svg>
             </Link>
+
             <a
               href="https://github.com/diegoc1005/Aetherius-Capital-Network-MVP"
               target="_blank"
@@ -262,7 +275,6 @@ export default function LandingPage() {
                 viewport={{ once: true, margin: '-60px' }}
                 className="glass-card p-6 relative group hover:border-[#E0115F]/20 transition-all duration-300"
               >
-                {/* Step number */}
                 <div className="text-[80px] font-bold text-[#E0115F]/5 absolute top-3 right-5 leading-none select-none">
                   {step.step}
                 </div>
@@ -271,8 +283,6 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
                 <p className="text-sm text-[#A1A1AA] leading-relaxed">{step.description}</p>
-
-                {/* Connector line (not on last) */}
                 {i < STEPS.length - 1 && (
                   <div className="hidden md:block absolute top-1/2 -right-3 w-6 border-t border-dashed border-[#27272A]" />
                 )}
@@ -316,9 +326,7 @@ export default function LandingPage() {
                     {card.badge}
                   </span>
                 </div>
-                <p className="text-sm text-[#A1A1AA] leading-relaxed mb-6">
-                  {card.description}
-                </p>
+                <p className="text-sm text-[#A1A1AA] leading-relaxed mb-6">{card.description}</p>
                 <div className="grid grid-cols-3 gap-3">
                   {card.stats.map((s) => (
                     <div key={s.label} className="bg-[#09090B]/60 rounded-lg p-3 text-center border border-[#27272A]/40">
@@ -350,7 +358,7 @@ export default function LandingPage() {
           </p>
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#E0115F] to-[#B80D4E] text-white font-semibold text-sm rounded-xl transition-all hover:shadow-2xl hover:shadow-[#E0115F]/30 hover:scale-[1.02] cursor-pointer"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#E0115F] to-[#B80D4E] text-white font-semibold text-sm rounded-xl transition-all hover:shadow-2xl hover:shadow-[#E0115F]/30 hover:scale-[1.02]"
           >
             Acceder al Terminal
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
