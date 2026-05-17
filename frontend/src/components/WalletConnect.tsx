@@ -74,7 +74,7 @@ export default function WalletConnect({ connectedAddress, onAddressChange }: Wal
   // Listen to provider events (accountsChanged, chainChanged)
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const provider = window.avalanche || window.ethereum;
+    const provider = (window.avalanche || window.ethereum) as any;
     if (provider && provider.on) {
       const handleAccounts = (accounts: string[]) => {
         if (accounts.length > 0) {
@@ -90,13 +90,13 @@ export default function WalletConnect({ connectedAddress, onAddressChange }: Wal
         window.location.reload();
       };
 
-      provider.on('accountsChanged', handleAccounts as any);
-      provider.on('chainChanged', handleChain as any);
+      provider.on('accountsChanged', handleAccounts);
+      provider.on('chainChanged', handleChain);
 
       return () => {
         if (provider.removeListener) {
-          provider.removeListener('accountsChanged', handleAccounts as any);
-          provider.removeListener('chainChanged', handleChain as any);
+          provider.removeListener('accountsChanged', handleAccounts);
+          provider.removeListener('chainChanged', handleChain);
         }
       };
     }

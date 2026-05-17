@@ -78,17 +78,19 @@ Aetherius-Capital-Network/
 ├── frontend/
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── page.tsx       # Dashboard principal (orquestador)
-│   │   │   ├── layout.tsx     # Fonts Inter + Fira Code, SEO
+│   │   │   ├── page.tsx       # Landing Page pública institucional (Bitso-style)
+│   │   │   ├── dashboard/
+│   │   │   │   └── page.tsx   # Dashboard principal y Gating de Wallet (Treasury Block)
+│   │   │   ├── layout.tsx     # Fonts Inter + Fira Code, SEO (Sin ClerkProvider)
 │   │   │   └── globals.css    # Design system institucional
 │   │   ├── components/
-│   │   │   ├── DashboardHeader.tsx # Cabecera aislada con isotipo Midjourney
-│   │   │   ├── Sidebar.tsx        # Navegación + estado de red
+│   │   │   ├── DashboardHeader.tsx # Cabecera aislada con logo y selector de Wallet
+│   │   │   ├── Sidebar.tsx        # Navegación + estado de red (Avalanche Fuji)
 │   │   │   ├── PortfolioMetrics.tsx # KPIs + tabla ERC-20
 │   │   │   ├── RWAMarketTable.tsx  # Mercado secundario startups
 │   │   │   ├── ComplianceView.tsx  # Wavy Node risk score dinámico
 │   │   │   ├── SettingsView.tsx    # Gestión de Viewing Keys on-chain (Ethers.js)
-│   │   │   └── WalletConnect.tsx   # Conexión Core/MetaMask
+│   │   │   └── WalletConnect.tsx   # Conector Web3 (Auto-login, listeners y localStorage sync)
 │   │   ├── lib/
 │   │   │   └── mockData.ts   # Datos mock + funciones Data API
 │   │   └── AetheriusEquity.json   # ABI del contrato sincronizado
