@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, type Variants } from 'framer-motion';
 
 // ─── Framer Motion Variants ───
@@ -92,8 +93,14 @@ export default function LandingPage() {
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E0115F] to-[#FF2D78] flex items-center justify-center shadow-lg shadow-[#E0115F]/20">
-              <span className="font-bold text-white text-xs tracking-tighter">AE</span>
+            <div className="relative w-9 h-9 rounded-xl bg-[#0e0f14] flex items-center justify-center ruby-glow overflow-hidden shadow-lg shadow-[#E0115F]/20">
+              <Image 
+                src="/aetherius-logo.png" 
+                alt="Aetherius Isotype"
+                fill={true}
+                className="object-contain"
+                priority={true} 
+              />
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-[#F4F4F5] leading-tight">Aetherius</span>
@@ -118,7 +125,17 @@ export default function LandingPage() {
       {/* ═══ HERO ═══ */}
       <section className="relative min-h-screen flex items-center justify-center px-6 pt-16 overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Large Logo Background */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[800px] sm:h-[800px] opacity-[0.05] mix-blend-screen animate-glow-pulse">
+            <Image 
+              src="/aetherius-logo.png" 
+              alt="Aetherius Background"
+              fill={true}
+              className="object-contain"
+              priority={true}
+            />
+          </div>
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#E0115F]/8 blur-[120px] animate-glow-pulse" />
           <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[#1E40AF]/6 blur-[100px] animate-glow-pulse" style={{ animationDelay: '2s' }} />
           {/* Grid */}
