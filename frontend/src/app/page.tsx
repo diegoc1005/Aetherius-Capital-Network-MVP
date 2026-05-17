@@ -92,23 +92,15 @@ export default function LandingPage() {
         className="fixed top-0 left-0 right-0 z-50 border-b border-[#1C1C1F]/60 bg-[#09090B]/80 backdrop-blur-xl"
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative w-10 h-10 flex items-center justify-center">
+          <div className="flex items-center">
+            <div className="relative w-40 h-10 flex items-center justify-center">
               <Image 
                 src="/aetherius-logo.png" 
-                alt="Aetherius Isotype"
+                alt="Aetherius Logo"
                 fill={true}
-                className="object-contain"
+                className="object-contain object-left"
                 priority={true} 
               />
-            </div>
-            <div className="flex flex-col justify-center pt-0.5">
-              <span className="font-black text-xl tracking-wide text-white leading-none">
-                ÆTHERIUS
-              </span>
-              <span className="text-[10px] text-[#60728F] font-bold uppercase tracking-[0.15em] leading-none mt-1">
-                CAPITAL NETWORK
-              </span>
             </div>
           </div>
           <div className="flex items-center gap-6">
