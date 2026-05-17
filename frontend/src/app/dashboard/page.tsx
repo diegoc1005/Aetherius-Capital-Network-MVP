@@ -6,6 +6,7 @@ import AetheriusEquityArtifact from '../../AetheriusEquity.json';
 import Sidebar from '@/components/Sidebar';
 import type { TabId } from '@/components/Sidebar';
 import WalletConnect from '@/components/WalletConnect';
+import DashboardHeader from '@/components/DashboardHeader';
 import PortfolioMetrics from '@/components/PortfolioMetrics';
 import RWAMarketTable from '@/components/RWAMarketTable';
 import ComplianceView from '@/components/ComplianceView';
@@ -231,27 +232,7 @@ export default function DashboardPage() {
 
       <div className="flex-1 flex flex-col lg:ml-[260px] min-w-0">
         {/* Top Bar */}
-        <header className="h-14 border-b border-[#1C1C1F] bg-[#111113]/80 backdrop-blur-sm flex items-center justify-between px-6 shrink-0 sticky top-0 z-30">
-          <div className="flex items-center gap-4">
-            <div className="lg:hidden flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#1E40AF] to-[#3B82F6] flex items-center justify-center">
-                <span className="font-bold text-white text-[10px]">AE</span>
-              </div>
-              <span className="text-sm font-semibold text-[#F4F4F5]">Aetherius</span>
-            </div>
-            <h1 className="text-sm font-medium text-[#A1A1AA] max-lg:hidden">
-              {TAB_TITLES[activeTab]}
-            </h1>
-            <span className="text-[10px] text-[#71717A] bg-[#18181B] px-2 py-0.5 rounded font-data border border-[#27272A]">v1.0.0-beta</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-2 text-[11px] text-[#71717A]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
-              Fuji Testnet
-            </div>
-            <WalletConnect onAddressChange={setWalletAddress} />
-          </div>
-        </header>
+        <DashboardHeader onAddressChange={setWalletAddress} />
 
         {/* Scrollable Content — Renders active view */}
         <main className="flex-1 overflow-y-auto p-5 lg:p-6 space-y-6">
