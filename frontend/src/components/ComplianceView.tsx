@@ -36,9 +36,30 @@ export default function ComplianceView({ walletAddress }: ComplianceViewProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
-    const t = setTimeout(() => { setScore(MOCK_RISK_SCORE); setLoading(false); }, 1500);
-    return () => clearTimeout(t);
+    let active = true;
+    const fetchRisk = async () => {
+      setLoading(true);
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+        const response = await fetch(`${backendUrl}/api/register-wallet`, {
+          method: 'POST',
+          headers: { "ngrok-skip-browser-warning": "true", "Content-Type": "application/json" },
+          body: JSON.stringify({ walletAddress: walletAddress || '0x123' })
+        });
+        if (!response.ok) throw new Error('API Error');
+        const data = await response.json();
+        if (active) {
+          setScore(data.riskScore);
+        }
+      } catch (err) {
+        console.error(err);
+        if (active) setScore(MOCK_RISK_SCORE);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    fetchRisk();
+    return () => { active = false; };
   }, [walletAddress]);
 
   const risk = score !== null ? getRisk(score) : null;

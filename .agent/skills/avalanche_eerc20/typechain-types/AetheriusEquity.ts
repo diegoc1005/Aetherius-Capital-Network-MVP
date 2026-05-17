@@ -3,6 +3,7 @@
 /* eslint-disable */
 import type {
   BaseContract,
+  BigNumberish,
   BytesLike,
   FunctionFragment,
   Result,
@@ -26,7 +27,9 @@ export interface AetheriusEquityInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "balanceOfEncrypted"
+      | "crossChainLiquidate"
       | "encryptedStorage"
+      | "grantAuditorAccess"
       | "name"
       | "owner"
       | "registerAuditorPublicKey"
@@ -42,8 +45,16 @@ export interface AetheriusEquityInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "crossChainLiquidate",
+    values: [BytesLike, AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "encryptedStorage",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "grantAuditorAccess",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -63,7 +74,15 @@ export interface AetheriusEquityInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "crossChainLiquidate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "encryptedStorage",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "grantAuditorAccess",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
@@ -142,7 +161,23 @@ export interface AetheriusEquity extends BaseContract {
     "view"
   >;
 
+  crossChainLiquidate: TypedContractMethod<
+    [
+      destinationChainID: BytesLike,
+      targetAddress: AddressLike,
+      amount: BigNumberish
+    ],
+    [void],
+    "nonpayable"
+  >;
+
   encryptedStorage: TypedContractMethod<[], [string], "view">;
+
+  grantAuditorAccess: TypedContractMethod<
+    [auditor: AddressLike],
+    [void],
+    "nonpayable"
+  >;
 
   name: TypedContractMethod<[], [string], "view">;
 
@@ -172,8 +207,22 @@ export interface AetheriusEquity extends BaseContract {
     nameOrSignature: "balanceOfEncrypted"
   ): TypedContractMethod<[account: AddressLike], [string], "view">;
   getFunction(
+    nameOrSignature: "crossChainLiquidate"
+  ): TypedContractMethod<
+    [
+      destinationChainID: BytesLike,
+      targetAddress: AddressLike,
+      amount: BigNumberish
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "encryptedStorage"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "grantAuditorAccess"
+  ): TypedContractMethod<[auditor: AddressLike], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "name"
   ): TypedContractMethod<[], [string], "view">;

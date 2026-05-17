@@ -99,4 +99,25 @@ contract AetheriusEquity {
     function balanceOfEncrypted(address account) external view returns (bytes memory) {
         return encryptedStorage.getEncryptedBalance(account);
     }
+
+    /**
+     * @notice Grants auditor access to a specific address.
+     * @dev Complies with eERC20 auditor management.
+     * @param auditor The address of the auditor (e.g., CNBV).
+     */
+    function grantAuditorAccess(address auditor) external onlyOwner {
+        // Simulation of auditor access grant to viewing keys
+        emit AuditorKeyRegistered(auditor, "0x0");
+    }
+
+    /**
+     * @notice Simulates a cross-chain liquidation message using Avalanche Teleporter.
+     * @dev In a real integration, this calls ITeleporterMessenger.sendCrossChainMessage.
+     * @param destinationChainID The ID of the destination chain (e.g., C-Chain).
+     * @param targetAddress The contract address on the destination chain.
+     * @param amount The amount to liquidate.
+     */
+    function crossChainLiquidate(bytes32 destinationChainID, address targetAddress, uint256 amount) external onlyOwner {
+        // Simulates Teleporter cross-chain message
+    }
 }

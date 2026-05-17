@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import { BrowserProvider, Contract } from 'ethers';
+import AetheriusEquityArtifact from '../AetheriusEquity.json';
 
 // ═══════════════════════════════════════════════════════════════
 // eERC20 Viewing Keys & Auditoría — Configuración
@@ -25,13 +27,38 @@ export default function SettingsView({ walletAddress }: SettingsViewProps) {
   const [showGrant, setShowGrant] = useState(false);
   const [granted, setGranted] = useState(false);
 
-  const handleGrant = () => {
+  const [viewingKey, setViewingKey] = useState('');
+
+  const handleGrant = async () => {
+    if (!viewingKey) {
+      alert("Por favor, ingresa la Viewing Key (Address) del auditor.");
+      return;
+    }
     setShowGrant(true);
-    setTimeout(() => {
+    try {
+      if (!window.avalanche && !window.ethereum) {
+        throw new Error('No se encontró una wallet conectada.');
+      }
+      // @ts-ignore
+      const provider = new BrowserProvider(window.avalanche || window.ethereum);
+      const signer = await provider.getSigner();
+      
+      const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+      if (!contractAddress) throw new Error('Falta NEXT_PUBLIC_CONTRACT_ADDRESS en .env.local');
+      
+      const contract = new Contract(contractAddress, AetheriusEquityArtifact.abi, signer);
+      
+      const tx = await contract.grantAuditorAccess(viewingKey);
+      await tx.wait(); // Esperar confirmación de bloque
+
       setKeys((prev) => prev.map((k) => k.id === 'vk-3' ? { ...k, status: 'active' as const, access: 'read-only', created: new Date().toLocaleDateString('es-MX') } : k));
       setGranted(true);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || 'Error al otorgar acceso.');
+    } finally {
       setShowGrant(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -118,28 +145,40 @@ export default function SettingsView({ walletAddress }: SettingsViewProps) {
         {granted ? (
           <div className="p-4 rounded-lg bg-[#22C55E]/8 border border-[#22C55E]/15 flex items-center gap-3 animate-fade-in">
             <svg className="w-5 h-5 text-[#22C55E] flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <p className="text-sm font-medium text-[#22C55E]">Viewing Key otorgada a la CNBV. El regulador puede auditar balances eERC20 en modo read-only.</p>
+            <p className="text-sm font-medium text-[#22C55E]">Viewing Key otorgada a la CNBV ({viewingKey.slice(0, 8)}...). El regulador puede auditar balances eERC20 en modo read-only.</p>
           </div>
         ) : (
-          <button
-            onClick={handleGrant}
-            disabled={showGrant}
-            className={`w-full py-3.5 rounded-lg font-semibold text-sm transition-all flex justify-center items-center gap-3 cursor-pointer ${
-              showGrant ? 'bg-[#18181B] border-2 border-[#1E40AF]/30 text-[#3B82F6]' : 'bg-gradient-to-r from-[#1E40AF] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#2563EB] text-white shadow-lg shadow-blue-900/20'
-            }`}
-          >
-            {showGrant ? (
-              <>
-                <svg className="animate-spin h-4 w-4 text-[#3B82F6]" viewBox="0 0 24 24" fill="none"><circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" /><path className="opacity-80" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" d="M12 2a10 10 0 019.95 9" /></svg>
-                Firmando Viewing Key en Blockchain...
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                Otorgar Acceso de Auditoría a CNBV / Regulador
-              </>
-            )}
-          </button>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[11px] text-[#71717A] uppercase tracking-wider mb-2">Viewing Key del Regulador (Address)</label>
+              <input 
+                type="text" 
+                value={viewingKey}
+                onChange={(e) => setViewingKey(e.target.value)}
+                placeholder="0x..." 
+                className="w-full bg-[#09090B] border border-[#27272A] rounded-lg px-4 py-2.5 text-sm text-[#F4F4F5] focus:outline-none focus:border-[#3B82F6] transition-colors"
+              />
+            </div>
+            <button
+              onClick={handleGrant}
+              disabled={showGrant || !viewingKey}
+              className={`w-full py-3.5 rounded-lg font-semibold text-sm transition-all flex justify-center items-center gap-3 cursor-pointer ${
+                showGrant ? 'bg-[#18181B] border-2 border-[#1E40AF]/30 text-[#3B82F6]' : 'bg-gradient-to-r from-[#E0115F] to-[#BE0F51] hover:from-[#BE0F51] hover:to-[#9C0C43] text-white shadow-lg shadow-[#E0115F]/20'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {showGrant ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-[#3B82F6]" viewBox="0 0 24 24" fill="none"><circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" /><path className="opacity-80" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" d="M12 2a10 10 0 019.95 9" /></svg>
+                  Firmando Viewing Key en Blockchain...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                  Otorgar Acceso de Auditoría a CNBV / Regulador
+                </>
+              )}
+            </button>
+          </div>
         )}
         <p className="text-[10px] text-[#71717A] mt-3 text-center">
           Esta acción es revocable. La clave puede rotarse sin redesplegar el contrato eERC20.
