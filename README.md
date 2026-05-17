@@ -82,9 +82,12 @@ Aetherius-Capital-Network/
 │   │   │   ├── layout.tsx     # Fonts Inter + Fira Code, SEO
 │   │   │   └── globals.css    # Design system institucional
 │   │   ├── components/
+│   │   │   ├── DashboardHeader.tsx # Cabecera aislada con isotipo Midjourney
 │   │   │   ├── Sidebar.tsx        # Navegación + estado de red
 │   │   │   ├── PortfolioMetrics.tsx # KPIs + tabla ERC-20
 │   │   │   ├── RWAMarketTable.tsx  # Mercado secundario startups
+│   │   │   ├── ComplianceView.tsx  # Wavy Node risk score dinámico
+│   │   │   ├── SettingsView.tsx    # Gestión de Viewing Keys on-chain (Ethers.js)
 │   │   │   └── WalletConnect.tsx   # Conexión Core/MetaMask
 │   │   ├── lib/
 │   │   │   └── mockData.ts   # Datos mock + funciones Data API
@@ -176,9 +179,12 @@ Tabla de alta densidad con startups tokenizadas:
 
 El botón **"Verificar Compliance e Invertir"** ejecuta un proceso de 3 fases con spinner institucional:
 
-1. **Consultando Oráculo Wavy Node** → `fetch()` al backend vía ngrok
-2. **Verificando KYC Regulatorio** → Validación de datos (RFC, CURP)
+1. **Consultando Oráculo Wavy Node** → `fetch()` al backend local `/api/register-wallet` (simulación de latencia y SVG dinámico)
+2. **Verificando KYC Regulatorio** → Validación de datos y respuesta determinista (Riesgo Mínimo)
 3. **Firmando en Blockchain Avalanche** → Ethers.js + contrato AetheriusEquity
+
+### Gestión de Auditoría eERC20
+Panel de configuración (`SettingsView`) conectado mediante Ethers.js a la red de prueba Fuji. Permite registrar *Viewing Keys* institucionales en la blockchain (ej. auditores CNBV) invocando `grantAuditorAccess` del contrato inteligente.
 
 ---
 
@@ -210,6 +216,8 @@ Obtén tu API Key gratis en [Builder Hub Console](https://build.avax.network/con
 | **Red** | Avalanche Fuji Testnet (C-Chain) |
 | **Dirección** | `0x066e0221Be84B899b2e256E7A2f42d629a051bc6` |
 | **Estándar** | eERC20 (Encrypted ERC-20, Standalone Mode) |
+| **Gobernanza** | `grantAuditorAccess()` implementado para control de auditores (CNBV) |
+| **Interoperabilidad** | `crossChainLiquidate()` preparado para Avalanche Teleporter (L1s) |
 | **Explorer** | [Ver en Snowtrace](https://testnet.snowtrace.io/address/0x066e0221Be84B899b2e256E7A2f42d629a051bc6) |
 
 ---
@@ -220,7 +228,7 @@ Obtén tu API Key gratis en [Builder Hub Console](https://build.avax.network/con
 |-------|-------|
 | Background | `#09090B` (Negro OLED) |
 | Surface | `#111113` |
-| Primary | `#1E40AF` (Azul institucional) |
+| Primary | `#E0115F` (Rojo Rubí Brillante / Branding Institucional) |
 | Accent | `#F59E0B` (Ámbar) |
 | Success | `#22C55E` |
 | Font Display | Inter |
